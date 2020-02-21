@@ -24,7 +24,7 @@ class Batch_Balanced_Dataset(object):
         """
         log = open(f'./saved_models/{opt.experiment_name}/log_dataset.txt', 'a')
         dashed_line = '-' * 80
-        print(dashed_line)
+#         print(dashed_line)
         log.write(dashed_line + '\n')
         print(f'dataset_root: {opt.train_data}\nopt.select_data: {opt.select_data}\nopt.batch_ratio: {opt.batch_ratio}')
         log.write(f'dataset_root: {opt.train_data}\nopt.select_data: {opt.select_data}\nopt.batch_ratio: {opt.batch_ratio}\n')
@@ -55,7 +55,7 @@ class Batch_Balanced_Dataset(object):
                            for offset, length in zip(_accumulate(dataset_split), dataset_split)]
             selected_d_log = f'num total samples of {selected_d}: {total_number_dataset} x {opt.total_data_usage_ratio} (total_data_usage_ratio) = {len(_dataset)}\n'
             selected_d_log += f'num samples of {selected_d} per batch: {opt.batch_size} x {float(batch_ratio_d)} (batch_ratio) = {_batch_size}'
-            print(selected_d_log)
+#             print(selected_d_log)
             log.write(selected_d_log + '\n')
             batch_size_list.append(str(_batch_size))
             Total_batch_size += _batch_size
@@ -74,7 +74,7 @@ class Batch_Balanced_Dataset(object):
         Total_batch_size_log += f'{dashed_line}'
         opt.batch_size = Total_batch_size
 
-        print(Total_batch_size_log)
+#         print(Total_batch_size_log)
         log.write(Total_batch_size_log + '\n')
         log.close()
 
@@ -109,7 +109,7 @@ class LmdbDataset(Dataset):
         self.opt = opt
         self.env = lmdb.open(root, max_readers=32, readonly=True, lock=False, readahead=False, meminit=False)
         if not self.env:
-            print('cannot create lmdb from %s' % (root))
+#             print('cannot create lmdb from %s' % (root))
             sys.exit(0)
 
         with self.env.begin(write=False) as txn:
@@ -169,7 +169,7 @@ class LmdbDataset(Dataset):
                     img = Image.open(buf).convert('L')
 
             except IOError:
-                print(f'Corrupted image for {index}')
+#                 print(f'Corrupted image for {index}')
                 # make dummy image and dummy label for corrupted image.
                 if self.opt.rgb:
                     img = Image.new('RGB', (self.opt.imgW, self.opt.imgH))
