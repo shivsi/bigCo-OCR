@@ -100,31 +100,6 @@ class Batch_Balanced_Dataset(object):
         return balanced_batch_images, balanced_batch_texts
 
 
-def hierarchical_dataset(root, opt, select_data='/'):
-    """ select_data='/' contains all sub-directory of root directory """
-    dataset_list = []
-    dataset_log = f'dataset_root:    {root}\t dataset: {select_data[0]}'
-    print(dataset_log)
-    dataset_log += '\n'
-    for dirpath, dirnames, filenames in os.walk(root+'/'):
-        if not dirnames:
-            select_flag = False
-            for selected_d in select_data:
-                if selected_d in dirpath:
-                    select_flag = True
-                    break
-
-            if select_flag:
-                dataset = LmdbDataset(dirpath, opt)
-                sub_dataset_log = f'sub-directory:\t/{os.path.relpath(dirpath, root)}\t num samples: {len(dataset)}'
-                print(sub_dataset_log)
-                dataset_log += f'{sub_dataset_log}\n'
-                dataset_list.append(dataset)
-
-    concatenated_dataset = ConcatDataset(dataset_list)
-    
-    return concatenated_dataset, dataset_log
-
 
 class LmdbDataset(Dataset):
 
@@ -333,3 +308,48 @@ def tensor2im(image_tensor, imtype=np.uint8):
 def save_image(image_numpy, image_path):
     image_pil = Image.fromarray(image_numpy)
     image_pil.save(image_path)
+
+if __name__ == '__main__':
+    """
+    Main method
+    """
+    trainX, trainY = readData(TRAIN_FILENAME) # Training data
+    testX, testY = readData(TEST_FILENAME) # Testing data
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--epochs", dest="epochs", default=1000,
+                        type=int, help="Number of epochs")
+    parser.add_argument("-lr", "--learningrate", dest="learningRate", default=0.07,
+                        type=float, help="Learning rate or step size")
+    parser.add_argument("-bs", "--batchSize", dest="batchSize", default=10,
+                        type=int, help="Number of sample in mini-batches")
+    parser.add_argument("-r", "--regStrength", dest="regStrength", default=0.001,
+                        type=float, help="L2 weight decay regularization lambda value")
+    parser.add_argument("-m", "--momentum", dest="momentum", default=0.05,
+                        type=float, help="A momentum value")
+
+    args = parser.parse_args()
+
+    print(
+        "Epochs: {} | Learning Rate: {} | Batch Size: {} | Regularization Strength: {} | "
+        "Momentum: {} |".format(
+            args.epochs,
+            args.learningRate,
+            args.batchSize,
+            args.regStrength,
+            args.momentum
+        ))
+
+    epochs = int(args.epochs)
+    learningRate = float(args.learningRate)
+    batchSize = int(args.batchSize)
+    regStrength = int(args.regStrength)
+    momentum = int(args.momentum)
+
+
+    sm = Softmax(epochs=epochs, learningRate=learningRate, batchSize=batchSize,
+                 regStrength=regStrength, momentum=momentum)
+    trainLosses, testLosses, trainAcc, testAcc = sm.train(trainX, trainY, testX, testY) # Train a network
+    plotGraph(trainLosses, testLosses, trainAcc, testAcc)
+    plotDecisionBoundary(trainX, trainY)
+    plotDecisionBoundary(testX, testY)
